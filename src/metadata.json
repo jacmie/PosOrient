@@ -1,0 +1,37 @@
+{
+    "$schema": "https://go.kicad.org/pcm/schemas/v1",
+    "name": "PosOrient",
+    "description": "Positioning & Orientation of footprints in the PCB Editor",
+    "description_full": "Positioning & Orientation of footprints in the PCB Editor\n\n- get footprints position and orientation\n- work interactively, drag footprints and update data table\n- set new position and orientation in the table, update\n- save and open position and orientation configuration files\n- check log what changed\n- gui highlighting and tooltips",
+    "identifier": "com.github.jacmie.PosOrient",
+    "type": "plugin",
+    "author": {
+        "name": "jacmie",
+        "contact": {
+            "web": "https://github.com/jacmie"
+        }
+    },
+    "maintainer": {
+        "name": "jacmie",
+        "contact": {
+            "web": "https://github.com/jacmie"
+        }
+    },
+    "license": "GPL-3.0",
+    "resources": {
+        "homepage": "https://github.com/jacmie/PosOrient"
+    },
+    "tags": [
+        "kicad",
+        "footprint",
+        "position",
+        "orientation"
+    ],
+    "versions": [
+        {
+            "version": "1.0.0",
+            "status": "stable",
+            "kicad_version": "7.00"
+        }
+    ]
+}
