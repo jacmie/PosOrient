@@ -2,7 +2,7 @@
     "$schema": "https://go.kicad.org/pcm/schemas/v1",
     "name": "PosOrient",
     "description": "Positioning & Orientation of footprints in the PCB Editor",
-    "description_full": "Positioning & Orientation of footprints in the PCB Editor\n\n- get footprints position and orientation\n- work interactively, drag footprints and update data table\n- set new position and orientation in the table, update\n- save and open position and orientation configuration files\n- check log what changed\n- gui highlighting and tooltips",
+    "description_full": "Positioning & Orientation of footprints in the PCB Editor\n- get footprints position and orientation\n- work interactively, drag footprints and update data table\n- set new position and orientation and update PCB editor\n- save/open position and orientation configuration files\n- check log for changes\n- GUI highlighting and tooltips",
     "identifier": "com.github.jacmie.PosOrient",
     "type": "plugin",
     "author": {
