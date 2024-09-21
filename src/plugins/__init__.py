@@ -192,6 +192,30 @@ class PosOrientDialog(wx.Dialog):
         self.grid.Refresh()
         self.grid.Update()
 
+    def sort_grid_by_column(self, column_idx):
+        # Get the number of rows and columns
+        num_rows = self.grid.GetNumberRows()
+        num_cols = self.grid.GetNumberCols()
+    
+        # Extract data from the grid into a list of tuples
+        data = []
+        for row in range(num_rows):
+            row_data = []
+            for col in range(num_cols):
+                row_data.append(self.grid.GetCellValue(row, col))
+            data.append(tuple(row_data))
+    
+        # Sort the list of tuples by the specified column
+        sorted_data = sorted(data, key=lambda x: x[column_idx])
+    
+        # Clear the existing grid data
+        self.grid.ClearGrid()
+    
+        # Repopulate the grid with sorted data
+        for row_idx, row_data in enumerate(sorted_data):
+            for col_idx, value in enumerate(row_data):
+                self.grid.SetCellValue(row_idx, col_idx, value)
+
     def clear_modifications(self):
         for row in range(self.grid.GetNumberRows()):
             if self.grid.GetCellValue(row, 0) == '1':  # Marked Checked
@@ -221,6 +245,7 @@ class PosOrientDialog(wx.Dialog):
             self.grid.SetCellValue(fp_id, 5, str(orient.AsDegrees()))
             
         self.clear_modifications()
+        self.sort_grid_by_column(1)
         self.log.AppendText(f"Update the List\n")
         
     def on_open(self, event):
