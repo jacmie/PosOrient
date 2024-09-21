@@ -6,6 +6,7 @@ KiCad plugin for positioning and orientation of footprints
 - [x] get footprints position and orientation
 - [x] work interactively, drag footprints and update data table
 - [x] set new position, orientation and update PCB editor
+- [x] sort data in the table by the columns
 - [x] save/open position, orientation configuration files
 - [x] check log for changes
 - [x] GUI highlighting and tooltips
@@ -27,4 +28,4 @@ or selecting in the menu: `Tools -> External Plugins`
 Create schematic with assigned footprints to the symbols. Open `PCB Editor` and `Update PCB from Schematic`.
 You can provide the footprints to the `PCB Editor` by any possible means.
 
-Run the plugin from the toolbar, or menu. If the `PCB editor` contains footprints the dialog window of the plugin will fill the data table. You can save and make backup of the data at any time. Drag the footprints in the main window with mouse, it's not necessary to close the plugin's dialog. Update new footprints positions in the data table with the `List` button. Change position and orientation in the data table. Changed cells are marked with yellow color. To make changes take effect press the `Orient` button, yellow marking will be cleared. Use spread sheet, or any other useful tool to manipulate the saved data and read it back to the data table. Got lost what you did? Follow the log, or just read in the backup. It's simple as that!
+Run the plugin from the toolbar, or menu. If the `PCB editor` contains footprints the dialog window of the plugin will fill the data table. Sort the table by columns, click on the column header. You can save and make backup of the data at any time. Drag the footprints in the main window with mouse, it's not necessary to close the plugin's dialog. Update new footprints positions in the data table with the `List` button. Change position and orientation in the data table. Changed cells are marked with yellow color. To make changes take effect press the `Orient` button, yellow marking will be cleared. Use spread sheet, or any other useful tool to manipulate the saved data and read it back to the data table. Got lost what you did? Follow the log, or just read in the backup. It's simple as that!
