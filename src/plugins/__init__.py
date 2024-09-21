@@ -207,20 +207,19 @@ class PosOrientDialog(wx.Dialog):
         self.grid.Update()
 
     def sort_grid_by_column(self, column_idx):
-        # Get the number of rows and columns
-        num_rows = self.grid.GetNumberRows()
-        num_cols = self.grid.GetNumberCols()
-    
         # Extract data from the grid into a list of tuples
         data = []
-        for row in range(num_rows):
+        for row in range(self.grid.GetNumberRows()):
             row_data = []
-            for col in range(num_cols):
+            for col in range(self.grid.GetNumberCols()):
                 row_data.append(self.grid.GetCellValue(row, col))
             data.append(tuple(row_data))
     
         # Sort the list of tuples by the specified column
-        sorted_data = sorted(data, key=lambda x: x[column_idx])
+        if column_idx in [3, 4, 5]:     # columns with pure numbers
+            sorted_data = sorted(data, key=lambda x: float(x[column_idx]))
+        else:                           # columns with strings
+            sorted_data = sorted(data, key=lambda x: x[column_idx])
     
         # Clear the existing grid data
         self.grid.ClearGrid()
@@ -229,7 +228,7 @@ class PosOrientDialog(wx.Dialog):
         for row_idx, row_data in enumerate(sorted_data):
             for col_idx, value in enumerate(row_data):
                 self.grid.SetCellValue(row_idx, col_idx, value)
-
+    
     def on_column_header_click(self, event):
         column_idx = event.GetCol()
         self.sort_grid_by_column(column_idx)
