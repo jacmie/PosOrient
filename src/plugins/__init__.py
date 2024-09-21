@@ -21,7 +21,9 @@ class PosOrientDialog(wx.Dialog):
         self.grid.CreateGrid(self.num_rows, self.num_cols)
         self.grid.DisableDragRowSize()
         self.Bind(gridlib.EVT_GRID_CELL_CHANGED, self.on_cell_changed)
-        
+        #self.grid.Bind(gridlib.EVT_GRID_LABEL_LEFT_CLICK, self.on_column_header_click)
+        self.Bind(gridlib.EVT_GRID_LABEL_LEFT_CLICK, self.on_column_header_click)
+
         # Set headers labels
         self.grid.SetColLabelSize(25)  
         self.grid.SetRowLabelSize(50)
@@ -192,6 +194,18 @@ class PosOrientDialog(wx.Dialog):
         self.grid.Refresh()
         self.grid.Update()
 
+    def clear_modifications(self):
+        for row in range(self.grid.GetNumberRows()):
+            if self.grid.GetCellValue(row, 0) == '1':  # Marked Checked
+                for col in range(3, 6):
+                    self.grid.SetCellBackgroundColour(row, col, wx.Colour(247, 247, 247)) # default white
+            else: # Marked Unchecked
+                for col in range(3, 6):
+                    self.grid.SetCellBackgroundColour(row, col, wx.Colour(235, 235, 235)) # gray
+            
+        self.grid.Refresh()
+        self.grid.Update()
+
     def sort_grid_by_column(self, column_idx):
         # Get the number of rows and columns
         num_rows = self.grid.GetNumberRows()
@@ -216,17 +230,10 @@ class PosOrientDialog(wx.Dialog):
             for col_idx, value in enumerate(row_data):
                 self.grid.SetCellValue(row_idx, col_idx, value)
 
-    def clear_modifications(self):
-        for row in range(self.grid.GetNumberRows()):
-            if self.grid.GetCellValue(row, 0) == '1':  # Marked Checked
-                for col in range(3, 6):
-                    self.grid.SetCellBackgroundColour(row, col, wx.Colour(247, 247, 247)) # default white
-            else: # Marked Unchecked
-                for col in range(3, 6):
-                    self.grid.SetCellBackgroundColour(row, col, wx.Colour(235, 235, 235)) # gray
-            
-        self.grid.Refresh()
-        self.grid.Update()
+    def on_column_header_click(self, event):
+        column_idx = event.GetCol()
+        self.sort_grid_by_column(column_idx)
+        event.Skip() # Skip the event to allow the grid to process it further
 
     def on_get_footprints_list(self, event):
         board = pcbnew.GetBoard()
