@@ -140,9 +140,9 @@ class PosOrientDialog(wx.Dialog):
         for i in range(new_rows):
             self.grid.SetCellValue(i, 0, str(1))
             for j in range(1, 3):
-                # Make the first two columns read-only
+                # Make the columns read-only
                 self.grid.SetReadOnly(i, j)
-                # Set background color to light gray for the first three columns
+                # Set background color to light gray
                 self.grid.SetCellBackgroundColour(i, j, wx.Colour(235, 235, 235))
 
     def on_cell_changed(self, event):
@@ -255,7 +255,7 @@ class PosOrientDialog(wx.Dialog):
         self.log.AppendText(f"Update the List\n")
         
     def on_open(self, event):
-        with wx.FileDialog(self, "Open file", wildcard="(*.pos)|*.pos|(*.txt)|*.txt|(*.dat)|*.dat|(All *.*)|*.*",
+        with wx.FileDialog(self, "Open file", wildcard="(*.cpf)|*.cpf|(*.txt)|*.txt|(*.dat)|*.dat|(All *.*)|*.*",
                            style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST) as fileDialog:
 
             if fileDialog.ShowModal() == wx.ID_CANCEL:
@@ -310,17 +310,32 @@ class PosOrientDialog(wx.Dialog):
         with open(self.file_path, 'w', newline='') as file:
             # Write header
             file.write("# Component Placement File\n")
-            file.write(f"{'# Active':<10}{'Designator':<20}{'Footprint':<20}{'X (mm)':<10}{'Y (mm)':<10}{'Rotation':<10}\n")
+            file.write(f"{'# Active':<10}{'Designator':<20}{'Footprint':<20}{'X[mm]':<15}{'Y[mm]':<15}{'Rotation[deg]':<15}\n")
 
             # Write data
             for row in range(self.grid.GetNumberRows()):
                 row_data = [self.grid.GetCellValue(row, col) for col in range(self.grid.GetNumberCols())]
-                file.write(f"{row_data[0]:<10}{row_data[1]:<20}{row_data[2]:<20}{row_data[3]:<10}{row_data[4]:<10}{row_data[5]:<10}\n")
-            
+                formatted_row = ""
+
+                for idx, value in enumerate(row_data):
+                    if idx == 0:
+                        formatted_row += f"{value:<10}"
+                    elif idx in [1, 2]:
+                        formatted_row += f"{value:<20}"  # Use general width for other columns
+                    else:
+                        try:
+                            number_value = float(value.replace(',', '.'))  # Convert to float
+                            formatted_row += f"{number_value:<15.4f}"
+                        except ValueError:
+                            # If conversion fails (e.g., if the cell is empty or non-numeric), add the raw value
+                            formatted_row += f"{value:<15}"
+                
+                file.write(f"{formatted_row}\n")
+
             self.status_bar.SetStatusText(f"Work file: {self.file_path}", 0)
 
     def on_save_as(self, event):
-        with wx.FileDialog(self, "Save file", wildcard="(*.pos)|*.pos|(*.txt)|*.txt|(*.dat)|*.dat|(All *.*)|*.*",
+        with wx.FileDialog(self, "Save file", wildcard="(*.cpf)|*.cpf|(*.txt)|*.txt|(*.dat)|*.dat|(All *.*)|*.*",
                            style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT) as fileDialog:
 
             if fileDialog.ShowModal() == wx.ID_CANCEL:
@@ -329,7 +344,7 @@ class PosOrientDialog(wx.Dialog):
             self.file_path = fileDialog.GetPath()
 
             # Automatically add extension if missing
-            valid_extensions = [".pos", ".txt", ".dat"]
+            valid_extensions = [".cpf", ".txt", ".dat"]
             if not any(self.file_path.lower().endswith(ext) for ext in valid_extensions):
                 self.file_path += valid_extensions[0]  # Appending the first valid extension
             
