@@ -265,7 +265,9 @@ class PosOrientDialog(wx.Dialog):
             lines = []
 
             with open(self.file_path, 'r') as file:
-                for line in file:
+                data_line_corrupted = False
+                for line_number, line in enumerate(file, start=1):
+                #for line in file:
                     # Skip comments and empty lines
                     if not line.strip() or line.startswith('#'):
                         continue
@@ -275,7 +277,12 @@ class PosOrientDialog(wx.Dialog):
                     if len(values) == 6:
                         lines.append(values)
                     else:
-                        print(f"Skipping line: {line.strip()} - not enough values")
+                        self.log.AppendText(f"Data corrupted in line {line_number}:\n{line.strip()}\n")
+                        data_line_corrupted = True
+
+                if data_line_corrupted:
+                    wx.MessageBox(f"Expected 6 data entries in a single line, divided with spaces!\nWrong number of the data entries!\n\nReading data for these lines ommited!\nSee plugin's log for details.",
+                    "Data Line Corrupted", wx.OK | wx.ICON_ERROR)
 
                 self.status_bar.SetStatusText(f"Work file: {self.file_path}", 0)
 
@@ -312,6 +319,10 @@ class PosOrientDialog(wx.Dialog):
             file.write("# Component Placement File\n")
             file.write(f"{'# Active':<10}{'Designator':<20}{'Footprint':<20}{'X[mm]':<15}{'Y[mm]':<15}{'Rotation[deg]':<15}\n")
 
+            designator_too_long = False
+            footprint_name_too_long = False
+            footprint_name_has_spaces = False
+
             # Write data
             for row in range(self.grid.GetNumberRows()):
                 row_data = [self.grid.GetCellValue(row, col) for col in range(self.grid.GetNumberCols())]
@@ -320,8 +331,21 @@ class PosOrientDialog(wx.Dialog):
                 for idx, value in enumerate(row_data):
                     if idx == 0:
                         formatted_row += f"{value:<10}"
-                    elif idx in [1, 2]:
-                        formatted_row += f"{value:<20}"  # Use general width for other columns
+                    elif idx == 1:
+                        if len(value) > 20:
+                            self.log.AppendText(f"Too long Designator name:  {value}\n")
+                            designator_too_long = True
+                        else:
+                            formatted_row += f"{value:<20}"
+                    elif idx == 2:
+                        if " " in value:
+                            value = value.replace(" ", "_")
+                            self.log.AppendText(f"Footprint name spaces converted to underscores:  {value}\n")                            
+                            footprint_name_has_spaces = True
+                        if len(value) > 40:
+                            self.log.AppendText(f"Too long Footprint name:  {value}\n")
+                            footprint_name_too_long = True
+                        formatted_row += f"{value:<40}"
                     else:
                         try:
                             number_value = float(value.replace(',', '.'))  # Convert to float
@@ -331,6 +355,16 @@ class PosOrientDialog(wx.Dialog):
                             formatted_row += f"{value:<15}"
                 
                 file.write(f"{formatted_row}\n")
+
+            if designator_too_long:
+                wx.MessageBox(f"Too long Designator name!\n\nData for these Designators isn't saved!\nSee plugin's log for details.",
+                "Too Long Designator", wx.OK | wx.ICON_ERROR)
+            if footprint_name_too_long:
+                wx.MessageBox(f"Too long Footprint name.\n\nThay are for information purposes only and don't critically affect data.\nLonger Footprint names will be truncated to 40 characters.\nSee plugin's log for details.",
+                "Too Long Footprint name", wx.OK | wx.ICON_WARNING)
+            if footprint_name_has_spaces:
+                wx.MessageBox(f"Footprint names contain spaces.\n\nThay are for information purposes only and don't critically affect data.\nSpaces are converted to underscores.\nSee plugin's log for details.",
+                "Space to Underscore Conversion", wx.OK | wx.ICON_WARNING)
 
             self.status_bar.SetStatusText(f"Work file: {self.file_path}", 0)
 
@@ -402,10 +436,22 @@ class PosOrientPlugin(pcbnew.ActionPlugin):
         self.show_toolbar_button = True
         self.icon_file_name = os.path.join(os.path.dirname(__file__), 'icon.png')
         self.dark_icon_file_name = os.path.join(os.path.dirname(__file__), 'icon.png')
+        self.is_running = False
 
     def Run(self):
+        if self.is_running:
+            return  # Exit if already running
+
+        self.is_running = True
+
         dialog = PosOrientDialog(None)
+        dialog.Bind(wx.EVT_CLOSE, self.onDialogClose)
         dialog.Show()
+
+    def onDialogClose(self, event):
+        self.is_running = False
+        dialog = event.GetEventObject()
+        dialog.Destroy()
 
 # Register the plugin
 PosOrientPlugin().register()
