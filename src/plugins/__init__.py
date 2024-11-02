@@ -267,7 +267,6 @@ class PosOrientDialog(wx.Dialog):
             with open(self.file_path, 'r') as file:
                 data_line_corrupted = False
                 for line_number, line in enumerate(file, start=1):
-                #for line in file:
                     # Skip comments and empty lines
                     if not line.strip() or line.startswith('#'):
                         continue
@@ -317,7 +316,7 @@ class PosOrientDialog(wx.Dialog):
         with open(self.file_path, 'w', newline='') as file:
             # Write header
             file.write("# Component Placement File\n")
-            file.write(f"{'# Active':<10}{'Designator':<20}{'Footprint':<20}{'X[mm]':<15}{'Y[mm]':<15}{'Rotation[deg]':<15}\n")
+            file.write(f"{'# Active':<10}{'Designator':<20}{'Footprint':<40}{'X[mm]':<15}{'Y[mm]':<15}{'Rotation[deg]':<15}\n")
 
             designator_too_long = False
             footprint_name_too_long = False
@@ -407,7 +406,6 @@ class PosOrientDialog(wx.Dialog):
                         rot = float(self.grid.GetCellValue(row, 5).replace(',', '.'))
                         
                         pos = fp.GetPosition()
-                        #self.log.AppendText(f"Set:  {ref}  from: {1e-6*pos.x}, {1e-6*pos.y}, {fp.GetOrientation().AsDegrees()} - to:  {1e-6*x}, {1e-6*y}, {rot} \n")
                         pos.x = int(x)
                         pos.y = int(y)
                         fp.SetPosition(pos)
