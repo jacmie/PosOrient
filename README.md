@@ -15,9 +15,12 @@ KiCad plugin for positioning and orientation of footprints
 
 ## Installation
 
-Download release package from github on your local drive.
+PosOrient is part of the KiCad officiel repository. Simply open KiCad's `Plugin and Content Manager`, find the plugin in the repository, click `Install` and finally `Apply Pending Changes`.
+
+To install the very latest version download the release package from the github on your local drive.
 Open KiCad and the `Plugin and Content Manager`.
-Click button `Install from File ...` and select the plugin zip package.
+Click button `Install from File ...` and select the plugin zip package, `Apply Pending Changes`.
+
 That's it, it's done!
 
 The plugin should be available in the toolbar under the `PosOrient` icon: ![small_icon](src/plugins/icon.png)
