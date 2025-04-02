@@ -21,7 +21,6 @@ class PosOrientDialog(wx.Dialog):
         self.grid.CreateGrid(self.num_rows, self.num_cols)
         self.grid.DisableDragRowSize()
         self.Bind(gridlib.EVT_GRID_CELL_CHANGED, self.on_cell_changed)
-        #self.grid.Bind(gridlib.EVT_GRID_LABEL_LEFT_CLICK, self.on_column_header_click)
         self.Bind(gridlib.EVT_GRID_LABEL_LEFT_CLICK, self.on_column_header_click)
 
         # Set headers labels
@@ -71,6 +70,10 @@ class PosOrientDialog(wx.Dialog):
         self.list_button = wx.Button(self.panel, label="List", size=(80, 25))
         self.list_button.SetToolTip(wx.ToolTip("Click to update list of the footprints and data from the KiCad PCB Editor"))
         self.list_button.Bind(wx.EVT_BUTTON, self.on_get_footprints_list)
+
+        self.selected_button = wx.Button(self.panel, label="Selected", size=(80, 25))
+        self.selected_button.SetToolTip(wx.ToolTip("Go on the list to the selected footprint"))
+        self.selected_button.Bind(wx.EVT_BUTTON, self.on_selected_footprint)
         
         self.open_button = wx.Button(self.panel, label="Open", size=(80, 25))
         self.open_button.SetToolTip(wx.ToolTip("Open data file with footprints position and orientation"))
@@ -91,23 +94,15 @@ class PosOrientDialog(wx.Dialog):
         self.cancel_button = wx.Button(self.panel, label="Close", size=(80, 25))
         self.cancel_button.Bind(wx.EVT_BUTTON, self.on_cancel)
 
-        # Shortcuts for buttons supported only on Windows?
-        accel_tbl = wx.AcceleratorTable([
-            (wx.ACCEL_CTRL, ord('l'), self.list_button.GetId()),
-            (wx.ACCEL_CTRL, ord('o'), self.open_button.GetId()),
-            (wx.ACCEL_CTRL, ord('s'), self.save_button.GetId()),
-            (wx.ACCEL_CTRL, ord('p'), self.orient_button.GetId())
-        ])
-        self.panel.SetAcceleratorTable(accel_tbl)
-
         # Buttons panel        
         button_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        button_sizer.Add(self.list_button, 0, wx.ALL, 5)
-        button_sizer.Add(self.open_button, 0, wx.ALL, 5)
-        button_sizer.Add(self.save_as_button, 0, wx.ALL, 5)
-        button_sizer.Add(self.save_button, 0, wx.ALL, 5)
-        button_sizer.Add(self.orient_button, 0, wx.ALL, 5)
-        button_sizer.Add(self.cancel_button, 0, wx.ALL, 5)
+        button_sizer.Add(self.list_button, 0, wx.ALL, 4)
+        button_sizer.Add(self.selected_button, 0, wx.ALL, 4)
+        button_sizer.Add(self.open_button, 0, wx.ALL, 4)
+        button_sizer.Add(self.save_as_button, 0, wx.ALL, 4)
+        button_sizer.Add(self.save_button, 0, wx.ALL, 4)
+        button_sizer.Add(self.orient_button, 0, wx.ALL, 4)
+        button_sizer.Add(self.cancel_button, 0, wx.ALL, 4)
 
         # Status bar
         self.status_bar = wx.StatusBar(self.panel)
@@ -128,6 +123,13 @@ class PosOrientDialog(wx.Dialog):
         # Simulate the button_list event and get the list
         event = wx.CommandEvent(wx.EVT_BUTTON.typeId, self.list_button.GetId())
         wx.PostEvent(self.list_button, event)
+
+        board = pcbnew.GetBoard()
+        design_settings = board.GetDesignSettings()
+        drill_origin = design_settings.GetAuxOrigin()
+        drill_x_mm = drill_origin.x / 1e6
+        drill_y_mm = drill_origin.y / 1e6
+        self.log.AppendText(f"Footprints position reference is the Drill Origin ({drill_x_mm:.4f}, {drill_y_mm:.4f}) mm\n")
 
     def resize_rows(self, new_rows):
         current_rows = self.grid.GetNumberRows()
@@ -236,6 +238,8 @@ class PosOrientDialog(wx.Dialog):
 
     def on_get_footprints_list(self, event):
         board = pcbnew.GetBoard()
+        design_settings = board.GetDesignSettings()
+        drill_origin = design_settings.GetAuxOrigin()
         fp_list = board.GetFootprints()
         
         self.resize_rows(len(fp_list))
@@ -246,14 +250,37 @@ class PosOrientDialog(wx.Dialog):
             
             self.grid.SetCellValue(fp_id, 1, fp.GetReference())
             self.grid.SetCellValue(fp_id, 2, fp.GetValue())
-            self.grid.SetCellValue(fp_id, 3, str(pos.x/1e6))
-            self.grid.SetCellValue(fp_id, 4, str(pos.y/1e6))
+            self.grid.SetCellValue(fp_id, 3, str((pos.x - drill_origin.x)/1e6))
+            self.grid.SetCellValue(fp_id, 4, str((pos.y - drill_origin.y)/1e6))
             self.grid.SetCellValue(fp_id, 5, str(orient.AsDegrees()))
             
         self.clear_modifications()
         self.sort_grid_by_column(1)
-        self.log.AppendText(f"Update the List\n")
-        
+        self.log.AppendText(f"Updated the List\n")
+    
+    def on_selected_footprint(self, event):
+        board = pcbnew.GetBoard()
+        footprints = board.GetFootprints()
+        selected_footprints = [fp for fp in footprints if fp.IsSelected()]
+
+        if not selected_footprints:
+            wx.MessageBox("No footprint selected.", "Error", wx.OK | wx.ICON_ERROR)
+            return
+
+        if len(selected_footprints) > 1:
+            wx.MessageBox("Multiple footprints selected. Please select only one.", "Error", wx.OK | wx.ICON_ERROR)
+            return
+
+        selected_ref = selected_footprints[0].GetReference()
+        for row in range(self.grid.GetNumberRows()):
+            cell_value = self.grid.GetCellValue(row, 1)
+            if cell_value == selected_ref:
+                self.grid.MakeCellVisible(row, 1)
+                self.grid.SelectRow(row)
+                return
+
+        wx.MessageBox(f"Footprint {selected_ref} not found in the list.", "Not Found", wx.OK | wx.ICON_INFORMATION)
+
     def on_open(self, event):
         with wx.FileDialog(self, "Open file", wildcard="(*.cpf)|*.cpf|(*.txt)|*.txt|(*.dat)|*.dat|(All *.*)|*.*",
                            style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST) as fileDialog:
@@ -405,9 +432,11 @@ class PosOrientDialog(wx.Dialog):
                         y = 1e6 * float(self.grid.GetCellValue(row, 4).replace(',', '.'))
                         rot = float(self.grid.GetCellValue(row, 5).replace(',', '.'))
                         
+                        design_settings = board.GetDesignSettings()
+                        drill_origin = design_settings.GetAuxOrigin()
                         pos = fp.GetPosition()
-                        pos.x = int(x)
-                        pos.y = int(y)
+                        pos.x = drill_origin.x + int(x)
+                        pos.y = drill_origin.y + int(y)
                         fp.SetPosition(pos)
                         fp.SetOrientationDegrees(rot)
                     except ValueError:
