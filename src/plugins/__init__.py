@@ -67,37 +67,42 @@ class PosOrientDialog(wx.Dialog):
                 self.grid.SetCellValue(i, j, data)
         
         # Create buttons
-        self.list_button = wx.Button(self.panel, label="List", size=(80, 25))
+        self.list_button = wx.Button(self.panel, label="List", size=(70, 25))
         self.list_button.SetToolTip(wx.ToolTip("Click to update list of the footprints and data from the KiCad PCB Editor"))
         self.list_button.Bind(wx.EVT_BUTTON, self.on_get_footprints_list)
 
-        self.selected_button = wx.Button(self.panel, label="Selected", size=(80, 25))
+        self.selected_button = wx.Button(self.panel, label="Selected", size=(70, 25))
         self.selected_button.SetToolTip(wx.ToolTip("Go on the list to the selected footprint"))
         self.selected_button.Bind(wx.EVT_BUTTON, self.on_selected_footprint)
         
-        self.open_button = wx.Button(self.panel, label="Open", size=(80, 25))
+        self.revers_button = wx.Button(self.panel, label="Revers Y", size=(70, 25))
+        self.revers_button.SetToolTip(wx.ToolTip("Revers Y position of a footprint"))
+        self.revers_button.Bind(wx.EVT_BUTTON, self.on_revers_y)
+
+        self.open_button = wx.Button(self.panel, label="Open", size=(70, 25))
         self.open_button.SetToolTip(wx.ToolTip("Open data file with footprints position and orientation"))
         self.open_button.Bind(wx.EVT_BUTTON, self.on_open)
 
-        self.save_as_button = wx.Button(self.panel, label="Save As", size=(80, 25))
+        self.save_as_button = wx.Button(self.panel, label="Save As", size=(70, 25))
         self.save_as_button.SetToolTip(wx.ToolTip("Save As data file with footprints position and orientation"))
         self.save_as_button.Bind(wx.EVT_BUTTON, self.on_save_as)
 
-        self.save_button = wx.Button(self.panel, label="Save", size=(80, 25))
+        self.save_button = wx.Button(self.panel, label="Save", size=(70, 25))
         self.save_button.SetToolTip(wx.ToolTip("Save data file with footprints position and orientation"))
         self.save_button.Bind(wx.EVT_BUTTON, self.on_save)
 
-        self.orient_button = wx.Button(self.panel, label="Orient", size=(80, 25))
+        self.orient_button = wx.Button(self.panel, label="Orient", size=(70, 25))
         self.orient_button.SetToolTip(wx.ToolTip("Click to set position and orientation of the footprints in the KiCad PCB Editor"))
         self.orient_button.Bind(wx.EVT_BUTTON, self.on_orient)
 
-        self.cancel_button = wx.Button(self.panel, label="Close", size=(80, 25))
+        self.cancel_button = wx.Button(self.panel, label="Close", size=(70, 25))
         self.cancel_button.Bind(wx.EVT_BUTTON, self.on_cancel)
 
         # Buttons panel        
         button_sizer = wx.BoxSizer(wx.HORIZONTAL)
         button_sizer.Add(self.list_button, 0, wx.ALL, 4)
         button_sizer.Add(self.selected_button, 0, wx.ALL, 4)
+        button_sizer.Add(self.revers_button, 0, wx.ALL, 4)
         button_sizer.Add(self.open_button, 0, wx.ALL, 4)
         button_sizer.Add(self.save_as_button, 0, wx.ALL, 4)
         button_sizer.Add(self.save_button, 0, wx.ALL, 4)
@@ -280,6 +285,26 @@ class PosOrientDialog(wx.Dialog):
                 return
 
         wx.MessageBox(f"Footprint {selected_ref} not found in the list.", "Not Found", wx.OK | wx.ICON_INFORMATION)
+
+    def on_revers_y(self, event):
+        for row in range(self.grid.GetNumberRows()):
+            try:
+                y = float(self.grid.GetCellValue(row, 4).replace(',', '.'))
+                self.grid.SetCellValue(row, 4, str(-y))
+            
+                cell_color = self.grid.GetCellBackgroundColour(row, 4)
+
+                if cell_color == wx.Colour(247, 247, 247) or cell_color == wx.Colour(255, 255, 50):  # default white or yellow
+                    self.grid.SetCellBackgroundColour(row, 4, wx.Colour(255, 255, 50)) # yellow
+                elif cell_color == wx.Colour(235, 235, 235) or cell_color == wx.Colour(240, 240, 180):  # grey or light gray
+                    self.grid.SetCellBackgroundColour(row, 4, wx.Colour(240, 240, 180)) # light yellow
+                else:
+                    print("Urecognised color")
+            except ValueError:
+                self.log.AppendText("Error: Cell value is not a valid number.")
+
+        self.grid.Refresh()
+        self.grid.Update()
 
     def on_open(self, event):
         with wx.FileDialog(self, "Open file", wildcard="(*.cpf)|*.cpf|(*.txt)|*.txt|(*.dat)|*.dat|(All *.*)|*.*",
