@@ -45,6 +45,9 @@ class PosOrientDialog(wx.Dialog):
         self.grid.SetColSize(0, 50)
         self.grid.SetColSize(2, 200)
         
+        # Set the text colour to black
+        self.grid.SetDefaultCellTextColour(wx.Colour(20, 20, 20))
+
         # Use GridCellFloatRenderer for the last three columns
         for i in range(3, 6):
             self.grid.SetColFormatFloat(i, width=-1, precision=4)
