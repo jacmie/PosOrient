@@ -72,49 +72,81 @@ class PosOrientDialog(wx.Dialog):
                 # Set data
                 data = f"({i+1}, {j+1})"
                 self.grid.SetCellValue(i, j, data)
+
+        # Create a notebook for tabs
+        notebook = wx.Notebook(self.panel)
+
+        # --- FILE TAB ---
+        file_panel = wx.Panel(notebook)
+        file_sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        open_button = wx.Button(file_panel, label="Open", size=(70, 25))
+        open_button.SetToolTip("Open data file with footprints position and orientation")
+        open_button.Bind(wx.EVT_BUTTON, self.on_open)
+
+        save_as_button = wx.Button(file_panel, label="Save As", size=(70, 25))
+        save_as_button.SetToolTip("Save As data file with footprints position and orientation")
+        save_as_button.Bind(wx.EVT_BUTTON, self.on_save_as)
+
+        save_button = wx.Button(file_panel, label="Save", size=(70, 25))
+        save_button.SetToolTip("Save data file with footprints position and orientation")
+        save_button.Bind(wx.EVT_BUTTON, self.on_save)
+
+        cancel_button = wx.Button(file_panel, label="Close", size=(70, 25))
+        cancel_button.Bind(wx.EVT_BUTTON, self.on_cancel)
+
+        file_sizer.Add(open_button, 0, wx.ALL, 4)
+        file_sizer.Add(save_as_button, 0, wx.ALL, 4)
+        file_sizer.Add(save_button, 0, wx.ALL, 4)
+        file_sizer.Add(cancel_button, 0, wx.ALL, 4)
+        file_panel.SetSizer(file_sizer)
+
+        # --- SINGLE TAB ---
+        single_panel = wx.Panel(notebook)
+        single_sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.list_button_single = wx.Button(single_panel, label="List", size=(70, 25))
+        self.list_button_single.SetToolTip("Click to update list of the footprints and data from the KiCad PCB Editor")
+        self.list_button_single.Bind(wx.EVT_BUTTON, self.on_get_footprints_list)
+
+        selected_button = wx.Button(single_panel, label="Selected", size=(70, 25))
+        selected_button.SetToolTip("Go on the list to the selected footprint")
+        selected_button.Bind(wx.EVT_BUTTON, self.on_selected_footprint)
         
-        # Create buttons
-        self.list_button = wx.Button(self.panel, label="List", size=(70, 25))
-        self.list_button.SetToolTip(wx.ToolTip("Click to update list of the footprints and data from the KiCad PCB Editor"))
-        self.list_button.Bind(wx.EVT_BUTTON, self.on_get_footprints_list)
+        orient_button_single = wx.Button(single_panel, label="Orient", size=(70, 25))
+        orient_button_single.SetToolTip("Click to set position and orientation of the footprints in the KiCad PCB Editor")
+        orient_button_single.Bind(wx.EVT_BUTTON, self.on_orient)
 
-        self.selected_button = wx.Button(self.panel, label="Selected", size=(70, 25))
-        self.selected_button.SetToolTip(wx.ToolTip("Go on the list to the selected footprint"))
-        self.selected_button.Bind(wx.EVT_BUTTON, self.on_selected_footprint)
-        
-        self.revers_button = wx.Button(self.panel, label="Revers Y", size=(70, 25))
-        self.revers_button.SetToolTip(wx.ToolTip("Revers Y position of a footprint"))
-        self.revers_button.Bind(wx.EVT_BUTTON, self.on_revers_y)
+        single_sizer.Add(self.list_button_single, 0, wx.ALL, 4)
+        single_sizer.Add(selected_button, 0, wx.ALL, 4)
+        single_sizer.Add(orient_button_single, 0, wx.ALL, 4)
+        single_panel.SetSizer(single_sizer)
 
-        self.open_button = wx.Button(self.panel, label="Open", size=(70, 25))
-        self.open_button.SetToolTip(wx.ToolTip("Open data file with footprints position and orientation"))
-        self.open_button.Bind(wx.EVT_BUTTON, self.on_open)
+        # --- GROUP TAB ---
+        group_panel = wx.Panel(notebook)
+        group_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.save_as_button = wx.Button(self.panel, label="Save As", size=(70, 25))
-        self.save_as_button.SetToolTip(wx.ToolTip("Save As data file with footprints position and orientation"))
-        self.save_as_button.Bind(wx.EVT_BUTTON, self.on_save_as)
+        list_button_group = wx.Button(group_panel, label="List", size=(70, 25))
+        list_button_group.SetToolTip("Click to update list of the footprints and data from the KiCad PCB Editor")
+        list_button_group.Bind(wx.EVT_BUTTON, self.on_get_footprints_list)
 
-        self.save_button = wx.Button(self.panel, label="Save", size=(70, 25))
-        self.save_button.SetToolTip(wx.ToolTip("Save data file with footprints position and orientation"))
-        self.save_button.Bind(wx.EVT_BUTTON, self.on_save)
+        revers_button = wx.Button(group_panel, label="Revers Y", size=(70, 25))
+        revers_button.SetToolTip("Revers Y position of a footprint")
+        revers_button.Bind(wx.EVT_BUTTON, self.on_revers_y)
 
-        self.orient_button = wx.Button(self.panel, label="Orient", size=(70, 25))
-        self.orient_button.SetToolTip(wx.ToolTip("Click to set position and orientation of the footprints in the KiCad PCB Editor"))
-        self.orient_button.Bind(wx.EVT_BUTTON, self.on_orient)
+        orient_button_group = wx.Button(group_panel, label="Orient", size=(70, 25))
+        orient_button_group.SetToolTip("Click to set position and orientation of the footprints in the KiCad PCB Editor")
+        orient_button_group.Bind(wx.EVT_BUTTON, self.on_orient)
 
-        self.cancel_button = wx.Button(self.panel, label="Close", size=(70, 25))
-        self.cancel_button.Bind(wx.EVT_BUTTON, self.on_cancel)
+        group_sizer.Add(list_button_group, 0, wx.ALL, 4)
+        group_sizer.Add(revers_button, 0, wx.ALL, 4)
+        group_sizer.Add(orient_button_group, 0, wx.ALL, 4)
+        group_panel.SetSizer(group_sizer)
 
-        # Buttons panel        
-        button_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        button_sizer.Add(self.list_button, 0, wx.ALL, 4)
-        button_sizer.Add(self.selected_button, 0, wx.ALL, 4)
-        button_sizer.Add(self.revers_button, 0, wx.ALL, 4)
-        button_sizer.Add(self.open_button, 0, wx.ALL, 4)
-        button_sizer.Add(self.save_as_button, 0, wx.ALL, 4)
-        button_sizer.Add(self.save_button, 0, wx.ALL, 4)
-        button_sizer.Add(self.orient_button, 0, wx.ALL, 4)
-        button_sizer.Add(self.cancel_button, 0, wx.ALL, 4)
+        # Add tabs to notebook
+        notebook.AddPage(file_panel, "File")
+        notebook.AddPage(single_panel, "Single")
+        notebook.AddPage(group_panel, "Group")
 
         # Status bar
         self.status_bar = wx.StatusBar(self.panel)
@@ -126,15 +158,15 @@ class PosOrientDialog(wx.Dialog):
         sizer.Add(self.grid, 1, wx.ALL | wx.EXPAND, 2)
         sizer.Add(self.log_label, 0, wx.ALL | wx.EXPAND, 2)
         sizer.Add(self.log, proportion=0, flag=wx.EXPAND | wx.ALL, border=2)
-        sizer.Add(button_sizer, 0, wx.ALL | wx.ALIGN_CENTER, 2)
+        sizer.Add(notebook, 0, wx.ALL | wx.EXPAND, 2)
         sizer.Add(self.status_bar, 0, wx.ALL | wx.EXPAND, 2)
         
         self.panel.SetSizer(sizer)
         sizer.Fit(self)
 
         # Simulate the button_list event and get the list
-        event = wx.CommandEvent(wx.EVT_BUTTON.typeId, self.list_button.GetId())
-        wx.PostEvent(self.list_button, event)
+        event = wx.CommandEvent(wx.EVT_BUTTON.typeId, self.list_button_single.GetId())
+        wx.PostEvent(self.list_button_single, event)
 
         board = pcbnew.GetBoard()
         design_settings = board.GetDesignSettings()
