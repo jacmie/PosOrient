@@ -5,7 +5,7 @@ import wx.grid as gridlib
 from .po_common import handle_orient, handle_get_footprints_list
 from .po_file import handle_open, handle_save_as, handle_save
 from .po_single import handle_selected_footprint
-from .po_group import handle_revers_y
+from .po_group import handle_shift_dx, handle_shift_dy, handle_revers_x, handle_revers_y
 
 class PosOrientDialog(wx.Dialog):
     def __init__(self, parent):
@@ -95,10 +95,12 @@ class PosOrientDialog(wx.Dialog):
         cancel_button = wx.Button(file_panel, label="Close", size=(70, 25))
         cancel_button.Bind(wx.EVT_BUTTON, self.on_cancel)
 
+        file_sizer.AddStretchSpacer(1)
         file_sizer.Add(open_button, 0, wx.ALL, 4)
         file_sizer.Add(save_as_button, 0, wx.ALL, 4)
         file_sizer.Add(save_button, 0, wx.ALL, 4)
         file_sizer.Add(cancel_button, 0, wx.ALL, 4)
+        file_sizer.AddStretchSpacer(1)
         file_panel.SetSizer(file_sizer)
 
         # --- SINGLE TAB ---
@@ -117,9 +119,11 @@ class PosOrientDialog(wx.Dialog):
         orient_button_single.SetToolTip("Click to set position and orientation of the footprints in the KiCad PCB Editor")
         orient_button_single.Bind(wx.EVT_BUTTON, self.on_orient)
 
+        single_sizer.AddStretchSpacer(1)
         single_sizer.Add(self.list_button_single, 0, wx.ALL, 4)
         single_sizer.Add(selected_button, 0, wx.ALL, 4)
         single_sizer.Add(orient_button_single, 0, wx.ALL, 4)
+        single_sizer.AddStretchSpacer(1)
         single_panel.SetSizer(single_sizer)
 
         # --- GROUP TAB ---
@@ -129,24 +133,42 @@ class PosOrientDialog(wx.Dialog):
         list_button_group = wx.Button(group_panel, label="List", size=(70, 25))
         list_button_group.SetToolTip("Click to update list of the footprints and data from the KiCad PCB Editor")
         list_button_group.Bind(wx.EVT_BUTTON, self.on_get_footprints_list)
+        
+        shift_dx_button = wx.Button(group_panel, label="Shift dX", size=(70, 25))
+        shift_dx_button.SetToolTip("Shift X position of a footprint by a given value")
+        shift_dx_button.Bind(wx.EVT_BUTTON, self.on_shift_dx)
 
-        revers_button = wx.Button(group_panel, label="Revers Y", size=(70, 25))
-        revers_button.SetToolTip("Revers Y position of a footprint")
-        revers_button.Bind(wx.EVT_BUTTON, self.on_revers_y)
+        shift_dy_button = wx.Button(group_panel, label="Shift dY", size=(70, 25))
+        shift_dy_button.SetToolTip("Shift Y position of a footprint by a given value")
+        shift_dy_button.Bind(wx.EVT_BUTTON, self.on_shift_dy)
+
+        revers_x_button = wx.Button(group_panel, label="Revers X", size=(70, 25))
+        revers_x_button.SetToolTip("Reverse X position of a footprint")
+        revers_x_button.Bind(wx.EVT_BUTTON, self.on_revers_x)
+
+        revers_y_button = wx.Button(group_panel, label="Revers Y", size=(70, 25))
+        revers_y_button.SetToolTip("Reverse Y position of a footprint")
+        revers_y_button.Bind(wx.EVT_BUTTON, self.on_revers_y)
 
         orient_button_group = wx.Button(group_panel, label="Orient", size=(70, 25))
         orient_button_group.SetToolTip("Click to set position and orientation of the footprints in the KiCad PCB Editor")
         orient_button_group.Bind(wx.EVT_BUTTON, self.on_orient)
 
+        group_sizer.AddStretchSpacer(1)
         group_sizer.Add(list_button_group, 0, wx.ALL, 4)
-        group_sizer.Add(revers_button, 0, wx.ALL, 4)
+        group_sizer.Add(shift_dx_button, 0, wx.ALL, 4)
+        group_sizer.Add(shift_dy_button, 0, wx.ALL, 4)
+        group_sizer.Add(revers_x_button, 0, wx.ALL, 4)
+        group_sizer.Add(revers_y_button, 0, wx.ALL, 4)
         group_sizer.Add(orient_button_group, 0, wx.ALL, 4)
+        group_sizer.AddStretchSpacer(1)
         group_panel.SetSizer(group_sizer)
 
         # Add tabs to notebook
         notebook.AddPage(file_panel, "File")
         notebook.AddPage(single_panel, "Single")
         notebook.AddPage(group_panel, "Group")
+        notebook.SetSelection(1)
 
         # Status bar
         self.status_bar = wx.StatusBar(self.panel)
@@ -286,6 +308,15 @@ class PosOrientDialog(wx.Dialog):
     def on_selected_footprint(self, event):
         handle_selected_footprint(self, event)
 
+    def on_revers_x(self, event):
+        handle_revers_x(self, event)
+        
+    def on_shift_dx(self, event):
+        handle_shift_dx(self, event)
+
+    def on_shift_dy(self, event):
+        handle_shift_dy(self, event)
+        
     def on_revers_y(self, event):
         handle_revers_y(self, event)
 
