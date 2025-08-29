@@ -17,9 +17,9 @@ def handle_get_footprints_list(dialog, event):
         dialog.grid.SetCellValue(fp_id, 3, str((pos.x - drill_origin.x)/1e6))
         dialog.grid.SetCellValue(fp_id, 4, str((pos.y - drill_origin.y)/1e6))
         dialog.grid.SetCellValue(fp_id, 5, str(orient.AsDegrees()))
-            
+        
     dialog.clear_modifications()
-    dialog.sort_grid_by_column(1)
+    dialog.activate_or_sort_grid_by_column(1)
     dialog.log.AppendText(f"Updated the List\n")
 
 def handle_orient(dialog, event):

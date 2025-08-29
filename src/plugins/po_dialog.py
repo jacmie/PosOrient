@@ -274,7 +274,22 @@ class PosOrientDialog(wx.Dialog):
         self.grid.Refresh()
         self.grid.Update()
 
-    def sort_grid_by_column(self, column_idx):
+    def activate_or_sort_grid_by_column(self, column_idx):
+        if column_idx == 0:  # Special case: toggle all checkboxes
+            if self.grid.GetNumberRows() == 0:
+                return
+
+            # Read the first row's checkbox state
+            first_value = self.grid.GetCellValue(0, 0)
+            # Determine the target value
+            new_value = "0" if first_value == "1" else "1"
+
+            # Set all checkboxes in column 0 to new_value
+            for row in range(self.grid.GetNumberRows()):
+                self.grid.SetCellValue(row, 0, new_value)
+
+            return
+
         # Extract data from the grid into a list of tuples
         data = []
         for row in range(self.grid.GetNumberRows()):
@@ -299,7 +314,7 @@ class PosOrientDialog(wx.Dialog):
     
     def on_column_header_click(self, event):
         column_idx = event.GetCol()
-        self.sort_grid_by_column(column_idx)
+        self.activate_or_sort_grid_by_column(column_idx)
         event.Skip() # Skip the event to allow the grid to process it further
 
     def on_get_footprints_list(self, event):
