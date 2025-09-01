@@ -1,7 +1,6 @@
 import os
 import pcbnew
 import wx
-import wx.grid as gridlib
 
 from .po_dialog import PosOrientDialog
 
@@ -30,4 +29,3 @@ class PosOrientPlugin(pcbnew.ActionPlugin):
         self.is_running = False
         dialog = event.GetEventObject()
         dialog.Destroy()
-

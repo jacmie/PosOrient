@@ -2,10 +2,10 @@ import pcbnew
 import wx
 import wx.grid as gridlib
 
-from .po_common import handle_orient, handle_get_footprints_list
 from .po_file import handle_open, handle_save_as, handle_save
+from .po_common import handle_orient, handle_get_footprints_list
 from .po_single import handle_selected_footprint
-from .po_group import handle_shift_dx, handle_shift_dy, handle_revers_x, handle_revers_y
+from .po_group import handle_selected_group_footprints, handle_shift_dx, handle_shift_dy, handle_revers_x, handle_revers_y
 
 class PosOrientDialog(wx.Dialog):
     def __init__(self, parent):
@@ -111,9 +111,9 @@ class PosOrientDialog(wx.Dialog):
         self.list_button_single.SetToolTip("Click to update list of the footprints and data from the KiCad PCB Editor")
         self.list_button_single.Bind(wx.EVT_BUTTON, self.on_get_footprints_list)
 
-        selected_button = wx.Button(single_panel, label="Selected", size=(70, 25))
-        selected_button.SetToolTip("Go on the list to the selected footprint")
-        selected_button.Bind(wx.EVT_BUTTON, self.on_selected_footprint)
+        selected_button_single = wx.Button(single_panel, label="Selected", size=(70, 25))
+        selected_button_single.SetToolTip("Go on the list to the selected footprint")
+        selected_button_single.Bind(wx.EVT_BUTTON, self.on_selected_footprint)
         
         orient_button_single = wx.Button(single_panel, label="Orient", size=(70, 25))
         orient_button_single.SetToolTip("Click to set position and orientation of the footprints in the KiCad PCB Editor")
@@ -121,7 +121,7 @@ class PosOrientDialog(wx.Dialog):
 
         single_sizer.AddStretchSpacer(1)
         single_sizer.Add(self.list_button_single, 0, wx.ALL, 4)
-        single_sizer.Add(selected_button, 0, wx.ALL, 4)
+        single_sizer.Add(selected_button_single, 0, wx.ALL, 4)
         single_sizer.Add(orient_button_single, 0, wx.ALL, 4)
         single_sizer.AddStretchSpacer(1)
         single_panel.SetSizer(single_sizer)
@@ -133,6 +133,10 @@ class PosOrientDialog(wx.Dialog):
         list_button_group = wx.Button(group_panel, label="List", size=(70, 25))
         list_button_group.SetToolTip("Click to update list of the footprints and data from the KiCad PCB Editor")
         list_button_group.Bind(wx.EVT_BUTTON, self.on_get_footprints_list)
+        
+        selected_button_group = wx.Button(group_panel, label="Selected", size=(70, 25))
+        selected_button_group.SetToolTip("Activate the selected footprints")
+        selected_button_group.Bind(wx.EVT_BUTTON, self.on_selected_group_footprints)
         
         shift_dx_button = wx.Button(group_panel, label="Shift dX", size=(70, 25))
         shift_dx_button.SetToolTip("Shift X position of a footprint by a given value")
@@ -156,6 +160,7 @@ class PosOrientDialog(wx.Dialog):
 
         group_sizer.AddStretchSpacer(1)
         group_sizer.Add(list_button_group, 0, wx.ALL, 4)
+        group_sizer.Add(selected_button_group, 0, wx.ALL, 4)
         group_sizer.Add(shift_dx_button, 0, wx.ALL, 4)
         group_sizer.Add(shift_dy_button, 0, wx.ALL, 4)
         group_sizer.Add(revers_x_button, 0, wx.ALL, 4)
@@ -317,23 +322,6 @@ class PosOrientDialog(wx.Dialog):
         self.activate_or_sort_grid_by_column(column_idx)
         event.Skip() # Skip the event to allow the grid to process it further
 
-    def on_get_footprints_list(self, event):
-        handle_get_footprints_list(self, event)
-    
-    def on_selected_footprint(self, event):
-        handle_selected_footprint(self, event)
-
-    def on_revers_x(self, event):
-        handle_revers_x(self, event)
-        
-    def on_shift_dx(self, event):
-        handle_shift_dx(self, event)
-
-    def on_shift_dy(self, event):
-        handle_shift_dy(self, event)
-        
-    def on_revers_y(self, event):
-        handle_revers_y(self, event)
 
     def on_open(self, event):
         handle_open(self, event)
@@ -343,9 +331,33 @@ class PosOrientDialog(wx.Dialog):
     
     def on_save(self, event):
         handle_save(self, event)
+
+    def on_cancel(self, event):
+        self.Close(wx.ID_CANCEL)
+
+
+    def on_get_footprints_list(self, event):
+        handle_get_footprints_list(self, event)
         
     def on_orient(self, event):
         handle_orient(self, event)
 
-    def on_cancel(self, event):
-        self.Close(wx.ID_CANCEL)
+
+    def on_selected_footprint(self, event):
+        handle_selected_footprint(self, event)
+
+
+    def on_selected_group_footprints(self, event):
+        handle_selected_group_footprints(self, event)
+
+    def on_shift_dx(self, event):
+        handle_shift_dx(self, event)
+
+    def on_shift_dy(self, event):
+        handle_shift_dy(self, event)
+
+    def on_revers_x(self, event):
+        handle_revers_x(self, event)
+
+    def on_revers_y(self, event):
+        handle_revers_y(self, event)

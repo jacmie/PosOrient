@@ -1,4 +1,106 @@
+import pcbnew
 import wx
+
+class ActionDialog(wx.Dialog):
+    def __init__(self, parent):
+        super().__init__(parent, title="Select Action")
+
+        main_sizer = wx.BoxSizer(wx.VERTICAL)
+
+        self.radio_buttons = []
+        actions = [
+            "Activate selected",
+            "Deactivate selected",
+            "Add activated selected",
+            "Subtract activated selected"
+        ]
+        for i, label in enumerate(actions):
+            rb = wx.RadioButton(self, label=label, style=wx.RB_GROUP if i == 0 else 0)
+            self.radio_buttons.append(rb)
+            main_sizer.Add(rb, 0, wx.ALL, 5)
+
+        # OK / Cancel buttons
+        btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        ok_btn = wx.Button(self, wx.ID_OK, label="OK", size=(70, 25))
+        cancel_btn = wx.Button(self, wx.ID_CANCEL, label="Cancel", size=(70, 25))
+        btn_sizer.AddStretchSpacer(1)
+        btn_sizer.Add(ok_btn, 0, wx.ALL, 5)
+        btn_sizer.Add(cancel_btn, 0, wx.ALL, 5)
+        btn_sizer.AddStretchSpacer(1)
+        main_sizer.Add(btn_sizer, 0, wx.EXPAND)
+
+        # Outer sizer for margins around all content
+        outer_sizer = wx.BoxSizer(wx.VERTICAL)
+        outer_sizer.Add(main_sizer, 1, wx.ALL | wx.EXPAND, 8)
+
+        self.SetSizer(outer_sizer)
+        self.Fit()
+        self.Centre()
+
+    def get_choice(self):
+        for i, rb in enumerate(self.radio_buttons):
+            if rb.GetValue():
+                return i
+        return None
+
+def handle_selected_group_footprints(dialog, event):
+    board = pcbnew.GetBoard()
+    footprints = board.GetFootprints()
+    selected_footprints = [fp for fp in footprints if fp.IsSelected()]
+
+    if not selected_footprints:
+        wx.MessageBox("No footprint selected.", "Error", wx.OK | wx.ICON_ERROR)
+        return
+
+    action_dlg = ActionDialog(dialog)
+    if action_dlg.ShowModal() != wx.ID_OK:
+        action_dlg.Destroy()
+        return
+
+    choice_idx = action_dlg.get_choice()
+    action_dlg.Destroy()
+
+    action_map = {
+        0: "Activate selected",
+        1: "Deactivate selected",
+        2: "Add activated selected",
+        3: "Subtract activated selected"
+    }
+    action = action_map.get(choice_idx)
+
+    selected_refs = {fp.GetReference() for fp in selected_footprints}
+
+    if action == "Activate selected":
+        # Selected get 1, others get 0
+        for row in range(dialog.grid.GetNumberRows()):
+            ref = dialog.grid.GetCellValue(row, 1)
+            dialog.grid.SetCellValue(row, 0, "1" if ref in selected_refs else "0")
+
+    elif action == "Deactivate selected":
+        # Selected get 0, others get 1
+        for row in range(dialog.grid.GetNumberRows()):
+            ref = dialog.grid.GetCellValue(row, 1)
+            dialog.grid.SetCellValue(row, 0, "0" if ref in selected_refs else "1")
+
+    elif action == "Add activated selected":
+        for row in range(dialog.grid.GetNumberRows()):
+            ref = dialog.grid.GetCellValue(row, 1)
+            if ref in selected_refs:
+                try:
+                    val = int(dialog.grid.GetCellValue(row, 0))
+                except ValueError:
+                    val = 0
+                dialog.grid.SetCellValue(row, 0, str(val + 1))
+
+    elif action == "Subtract activated selected":
+        for row in range(dialog.grid.GetNumberRows()):
+            ref = dialog.grid.GetCellValue(row, 1)
+            if ref in selected_refs:
+                try:
+                    val = int(dialog.grid.GetCellValue(row, 0))
+                except ValueError:
+                    val = 0
+                dialog.grid.SetCellValue(row, 0, str(max(val - 1, 0)))
 
 class ShiftDialog(wx.Dialog):
     def __init__(self, parent, axis_name, ask_value=True):
