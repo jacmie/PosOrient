@@ -1,6 +1,8 @@
 import pcbnew
 import wx
 
+from .po_common import color_cells
+
 class ActionDialog(wx.Dialog):
     def __init__(self, parent):
         super().__init__(parent, title="Select Action")
@@ -101,6 +103,8 @@ def handle_selected_group_footprints(dialog, event):
                 except ValueError:
                     val = 0
                 dialog.grid.SetCellValue(row, 0, str(max(val - 1, 0)))
+
+    color_cells(dialog)
 
 class ShiftDialog(wx.Dialog):
     def __init__(self, parent, axis_name, ask_value=True):
@@ -205,22 +209,26 @@ def handle_reverse_column(dialog, col_index, ignore_active=False):
 def handle_shift_column(dialog, col_index, shift_value, ignore_active=False):
     handle_column_update(dialog, col_index, lambda v: v + shift_value, ignore_active)
 
-def handle_revers_y(dialog, event):
-    ignore_active = shift_or_reverse(dialog, "Y", ask_value=False)
-    if ignore_active is not None:
-        handle_reverse_column(dialog, 4, ignore_active)
-
-def handle_revers_x(dialog, event):
-    ignore_active = shift_or_reverse(dialog, "X", ask_value=False)
-    if ignore_active is not None:
-        handle_reverse_column(dialog, 3, ignore_active)
-
 def handle_shift_dx(dialog, event):
     shift_value, ignore_active = shift_or_reverse(dialog, "dX", ask_value=True)
+    dialog.log.AppendText(f"Shift all dX = {shift_value}\n")
     if shift_value is not None:
         handle_shift_column(dialog, 3, shift_value, ignore_active)
 
 def handle_shift_dy(dialog, event):
     shift_value, ignore_active = shift_or_reverse(dialog, "dY", ask_value=True)
+    dialog.log.AppendText(f"Shift all dY = {shift_value}\n")
     if shift_value is not None:
         handle_shift_column(dialog, 4, shift_value, ignore_active)
+
+def handle_revers_x(dialog, event):
+    ignore_active = shift_or_reverse(dialog, "X", ask_value=False)
+    dialog.log.AppendText(f"Revers all X\n")
+    if ignore_active is not None:
+        handle_reverse_column(dialog, 3, ignore_active)
+
+def handle_revers_y(dialog, event):
+    ignore_active = shift_or_reverse(dialog, "Y", ask_value=False)
+    dialog.log.AppendText(f"Revers all Y\n")
+    if ignore_active is not None:
+        handle_reverse_column(dialog, 4, ignore_active)

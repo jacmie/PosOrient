@@ -3,7 +3,7 @@ import wx
 import wx.grid as gridlib
 
 from .po_file import handle_open, handle_save_as, handle_save
-from .po_common import handle_orient, handle_get_footprints_list
+from .po_common import handle_orient, handle_get_footprints_list, color_cells
 from .po_single import handle_selected_footprint
 from .po_group import handle_selected_group_footprints, handle_shift_dx, handle_shift_dy, handle_revers_x, handle_revers_y
 
@@ -272,9 +272,9 @@ class PosOrientDialog(wx.Dialog):
             if self.grid.GetCellValue(row, 0) == '1':  # Marked Checked
                 for col in range(3, 6):
                     self.grid.SetCellBackgroundColour(row, col, wx.Colour(247, 247, 247)) # default white
-            else: # Marked Unchecked
-                for col in range(3, 6):
-                    self.grid.SetCellBackgroundColour(row, col, wx.Colour(235, 235, 235)) # gray
+            # else: # Marked Unchecked
+            #     for col in range(3, 6):
+            #         self.grid.SetCellBackgroundColour(row, col, wx.Colour(235, 235, 235)) # gray
             
         self.grid.Refresh()
         self.grid.Update()
@@ -292,6 +292,8 @@ class PosOrientDialog(wx.Dialog):
             # Set all checkboxes in column 0 to new_value
             for row in range(self.grid.GetNumberRows()):
                 self.grid.SetCellValue(row, 0, new_value)
+
+            color_cells(self)
 
             return
 

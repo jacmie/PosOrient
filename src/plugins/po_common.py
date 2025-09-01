@@ -1,4 +1,5 @@
 import pcbnew
+import wx
 
 def handle_get_footprints_list(dialog, event):
     board = pcbnew.GetBoard()
@@ -27,6 +28,10 @@ def handle_orient(dialog, event):
     
     if board is not None:
         for row in range(dialog.grid.GetNumberRows()):
+            active_flag = dialog.grid.GetCellValue(row, 0).strip()
+            if not active_flag:
+                continue
+
             ref = dialog.grid.GetCellValue(row, 1)
             fp = board.FindFootprintByReference(ref)
 
@@ -54,3 +59,27 @@ def handle_orient(dialog, event):
         dialog.log.AppendText(f"Set Positions and Orientations\n")
     else:
         dialog.log.AppendText(f"Board not found!!!")
+
+def color_cells(dialog):
+    for row in range(dialog.grid.GetNumberRows()):
+        active_flag = dialog.grid.GetCellValue(row, 0).strip()
+        for col in range(3, dialog.grid.GetNumberCols()):
+            cell_color = dialog.grid.GetCellBackgroundColour(row, col)
+
+            if active_flag == "1":  # active row
+                if cell_color == wx.Colour(235, 235, 235):  # grey
+                    dialog.grid.SetCellBackgroundColour(row, col, wx.Colour(247, 247, 247))  # white
+                elif cell_color == wx.Colour(240, 240, 180):  # light yellow
+                    dialog.grid.SetCellBackgroundColour(row, col, wx.Colour(255, 255, 50))  # yellow
+                else:
+                    print(f"Unrecognised color at ({row},{col}): {cell_color}")
+            else:  # inactive row
+                if cell_color == wx.Colour(247, 247, 247):  # white
+                    dialog.grid.SetCellBackgroundColour(row, col, wx.Colour(235, 235, 235))  # grey
+                elif cell_color == wx.Colour(255, 255, 50):  # yellow
+                    dialog.grid.SetCellBackgroundColour(row, col, wx.Colour(240, 240, 180))  # light yellow
+                else:
+                    print(f"Unrecognised color at ({row},{col}): {cell_color}")
+
+    dialog.grid.Refresh()
+    dialog.grid.Update()
