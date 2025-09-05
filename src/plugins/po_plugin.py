@@ -4,6 +4,7 @@ import wx
 
 from .po_dialog import PosOrientDialog
 
+
 class PosOrientPlugin(pcbnew.ActionPlugin):
     def defaults(self):
         self.name = "PosOrient"
@@ -11,8 +12,8 @@ class PosOrientPlugin(pcbnew.ActionPlugin):
         self.description = "Positioning & Orientation of footprints in the PCB Editor"
         self.pcbnew_icon_support = hasattr(self, "show_toolbar_button")
         self.show_toolbar_button = True
-        self.icon_file_name = os.path.join(os.path.dirname(__file__), 'icon.png')
-        self.dark_icon_file_name = os.path.join(os.path.dirname(__file__), 'icon.png')
+        self.icon_file_name = os.path.join(os.path.dirname(__file__), "icon.png")
+        self.dark_icon_file_name = os.path.join(os.path.dirname(__file__), "icon.png")
         self.is_running = False
 
     def Run(self):

@@ -1,6 +1,7 @@
 import pcbnew
 import wx
 
+
 def handle_selected_footprint(dialog, event):
     board = pcbnew.GetBoard()
     footprints = board.GetFootprints()
@@ -11,7 +12,11 @@ def handle_selected_footprint(dialog, event):
         return
 
     if len(selected_footprints) > 1:
-        wx.MessageBox("Multiple footprints selected. Please select only one.", "Error", wx.OK | wx.ICON_ERROR)
+        wx.MessageBox(
+            "Multiple footprints selected. Please select only one.",
+            "Error",
+            wx.OK | wx.ICON_ERROR,
+        )
         return
 
     selected_ref = selected_footprints[0].GetReference()
@@ -21,5 +26,9 @@ def handle_selected_footprint(dialog, event):
             dialog.grid.MakeCellVisible(row, 1)
             dialog.grid.SelectRow(row)
             return
-    
-    wx.MessageBox(f"Footprint {selected_ref} not found in the list.", "Not Found", wx.OK | wx.ICON_INFORMATION)
+
+    wx.MessageBox(
+        f"Footprint {selected_ref} not found in the list.",
+        "Not Found",
+        wx.OK | wx.ICON_INFORMATION,
+    )
